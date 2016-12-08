@@ -3,8 +3,10 @@
 
 #include <Eigen/Core>
 #include <vector>
+#include "model.h"
 #include "Helpers.h"
 using namespace std;
+using namespace Eigen;
 
 class Grass{
 public:
@@ -16,8 +18,12 @@ public:
         vector<VertexBufferObject>& objs,
         vector<VertexBufferObject>& objs_color,
         vector<VertexBufferObject>&,
-        vector<VertexBufferObject>&,
-        vector<int>& opts
+        Eigen::Vector3f& light,
+        vector<int>& objs_size,
+        vector<Matrix4f>& translate_mat,
+        vector<Matrix4f>& to_center_mat,
+        vector<Matrix4f>& scale_mat,
+        vector<Matrix4f>& rotate_mat
     );
 };
 
