@@ -12,12 +12,16 @@
 // GLFW is necessary to handle the OpenGL context
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "SOIL.h"
+
 // Linear Algebra Library
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
 // Timer
 #include <chrono>
+#include <ctime>
+
 using namespace std;
 using namespace Eigen;
 
@@ -33,10 +37,14 @@ using namespace Eigen;
 #define ORTH 8
 #define PREP 9
 
+#define GRASS_NUM 200
+
 Eigen::Vector3f light;
 Eigen::Vector3f camera;
 Eigen::Vector3f gaze; // direction of camera
 Eigen::Vector3f up_direction; // the direction pointing up
+double wind_x=0.0;
+double wind_y=0.0;
 int state=INIT;
 int mode=ORTH;
 
@@ -44,7 +52,7 @@ vector<VertexBufferObject> objs;
 vector<VertexBufferObject> objs_color;
 vector<VertexBufferObject> objs_normals;
 vector<int> obj_size;
-
+vector<Grass> meadow;
 MatrixXf Mcam(4,4),Morth(4,4),Perspective(4,4),view(4,4);
 
 vector<Matrix4f> translate_mat;
@@ -103,6 +111,30 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     0,0,0,1;
     switch (key)
     {
+        case GLFW_KEY_P:
+            cout<<"wind_x: "<<wind_x<<endl;
+            cout<<"wind_y: "<<wind_y<<endl;
+            cout<<endl;
+            wind_x+=0.5;
+            break;
+        case GLFW_KEY_L:
+            cout<<"wind_x: "<<wind_x<<endl;
+            cout<<"wind_y: "<<wind_y<<endl;
+            cout<<endl;
+            wind_y+=0.5;
+            break;
+        case GLFW_KEY_O:
+            cout<<"wind_x: "<<wind_x<<endl;
+            cout<<"wind_y: "<<wind_y<<endl;
+            cout<<endl;
+            wind_x-=0.5;
+            break;
+        case GLFW_KEY_K:
+            cout<<"wind_x: "<<wind_x<<endl;
+            cout<<"wind_y: "<<wind_y<<endl;
+            cout<<endl;
+            wind_y-=0.5;
+            break;
         case GLFW_KEY_R:
             rotate_mat[0] *= rotate;
             break;
@@ -192,10 +224,23 @@ int main(void)
     gaze<<-camera;
     light<<-10,-10,-10;
     up_direction<<0,0,-1;
-    init_ground(light,objs,objs_color,objs_normals,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
-
-    Grass grass;
-    grass.draw(objs,objs_color,objs_normals,light,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
+	init_ground(light,objs,objs_color,objs_normals,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
+	Vector3f pos = Vector3f::Zero();
+	srand(time(NULL));
+	for(int i=0;i<GRASS_NUM;i++){
+		int random_var = rand();
+		pos << rand() % 10-5 + ((float)rand() / RAND_MAX),(float)(rand() % 10)-5 + ((float)rand() / RAND_MAX),0.0;
+		cout<<pos<<endl;
+		Grass grass(pos,i+1);
+		grass.draw(objs,objs_color,objs_normals,light,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
+		meadow.push_back(grass);
+	}
+    // Vector3f pos = Vector3f::Zero();
+    // Grass grass(pos,1);
+    // grass.draw(objs,objs_color,objs_normals,light,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
+    // pos<<1.5,1.5,0;
+    // Grass grass2(pos,2);
+    // grass2.draw(objs,objs_color,objs_normals,light,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
     // Initialize the OpenGL Program
     // A program controls the OpenGL pipeline and it must contains
     // at least a vertex shader and a fragment shader to be valid
@@ -204,6 +249,7 @@ int main(void)
             "#version 150 core\n"
                     "in vec3 position;"
                     "in vec3 normal;"
+					//"in vec2 uv;"
                     "uniform vec3 light;"
                     "uniform mat4 view;"
                     "uniform mat4 transform;"
@@ -212,6 +258,7 @@ int main(void)
                     "uniform mat4 Perspective;"
                     "in vec3 color;"
                     "out vec3 f_color;"
+					//"out vec2 texcoord;"
                     "void main()"
                     "{"
                     "    vec4 intermediate =  Perspective * Mcam * transform * vec4(position, 1.0);"
@@ -226,16 +273,22 @@ int main(void)
                     "    L = vec4(light,1.0);"
                     "    f_color = max(dot(normalize(L-transform*V),normalize(T*N)),0.0f)*color;"
                     //"   f_color=color;"
+					//"   texcoord = uv"
                     "}";
 
     const GLchar* fragment_shader =
             "#version 150 core\n"
                     "in vec3 f_color;"
+					//"in vec2 Texcoord;"
                     "out vec4 outColor;"
+					//"uniform sampler2D tex;"
                     "uniform vec3 triangleColor;"
                     "void main()"
                     "{"
+					//"if(Texcoord[0]<0)"
                     "    outColor = vec4(f_color, 1.0);"
+					//"else"
+					//"   outColor = texture(tex, Texcoord);"
                     "}";
 
     // Compile the two shaders and upload the binary to the GPU
@@ -243,6 +296,22 @@ int main(void)
     // is the one that we want in the fragment buffer (and thus on screen)
     program.init(vertex_shader,fragment_shader,"outColor");
     program.bind();
+	/* load an image file directly as a new OpenGL texture */
+	// Load textures
+	// Load texture
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    int width, height;
+    unsigned char* image = SOIL_load_image("soil.png", &width, &height, 0, SOIL_LOAD_RGB);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    SOIL_free_image_data(image);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // // The vertex shader wants the position of the vertices as an input.
     // // The following line connects the VBO we defined above with the position "slot"
@@ -272,6 +341,9 @@ int main(void)
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
+		for(int i=0;i<GRASS_NUM;i++){
+			meadow[i].update(objs,light,wind_x,wind_y);
+		}
         for(int i=0;i<objs.size();i++){
             program.bindVertexAttribArray("position",objs[i]);
             program.bindVertexAttribArray("color",objs_color[i]);
@@ -322,11 +394,10 @@ int main(void)
             glUniformMatrix4fv(program.uniform("Morth"), 1, GL_FALSE, Morth.data());
 
             if(i==0){
-                int triangle_number = obj_size[i]/3;
                 // Draw a triangle
-                glDrawArrays(GL_TRIANGLES, 0, triangle_number*3);
+                glDrawArrays(GL_TRIANGLES, 0, obj_size[i]);
             }else{
-                glDrawArrays(GL_LINES, 0, 100);
+                glDrawArrays(GL_LINES, 0, obj_size[i]);
             }
 
         }

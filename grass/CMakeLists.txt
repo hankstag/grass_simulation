@@ -22,7 +22,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../ext/eigen")
 
 ### Include glm lib
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../ext/glm")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../ext/SOIL")
 
 ### Compile GLFW3 statically
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
@@ -32,6 +32,10 @@ set(GLFW_BUILD_INSTALL OFF CACHE BOOL " " FORCE)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../ext/glfw" "glfw")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../ext/glfw/include")
 set(LIBRARIES "glfw" ${GLFW_LIBRARIES})
+
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../ext/SOIL" "SOIL")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../ext/SOIL/src")
+list(APPEND LIBRARIES "SOIL")
 
 ### On windows, you also need glew
 if((UNIX AND NOT APPLE) OR WIN32)
