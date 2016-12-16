@@ -108,7 +108,8 @@ void Grass::get_sample_pts(Vector3f& light, int num_pt, MatrixXf& sample_pts, Ma
 }
 
 void Grass::draw(
-    vector<VertexBufferObject>& objs,
+	vector<VertexBufferObject>& objs,
+    vector<VertexBufferObject>& objs_uv,
     vector<VertexBufferObject>& objs_color,
     vector<VertexBufferObject>& objs_normals,
     Vector3f& light,
@@ -135,11 +136,18 @@ void Grass::draw(
     rotate_mat.push_back(rotate);
     translate_mat.push_back(translate);
     scale_mat.push_back(scale);
-
+	Eigen::MatrixXf UV = Eigen::MatrixXf::Zero(2,color.cols());
+	for(int i=0;i<2;i++)
+		for(int j=0;j<UV.cols();j++)
+			UV(i,j) -= 1;
     VertexBufferObject vbo;
     vbo.init();
     vbo.update(sample_pts);
     objs.push_back(vbo);
+
+	vbo.init();
+	vbo.update(UV);
+	objs_uv.push_back(vbo);
 
     vbo.init();
     vbo.update(color);

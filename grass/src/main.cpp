@@ -49,6 +49,7 @@ int state=INIT;
 int mode=ORTH;
 
 vector<VertexBufferObject> objs;
+vector<VertexBufferObject> objs_uv;
 vector<VertexBufferObject> objs_color;
 vector<VertexBufferObject> objs_normals;
 vector<int> obj_size;
@@ -177,10 +178,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     GLFWwindow* window;
-
+	int num = stoi(argv[1]);
+	cout<<num<<endl;
     // Initialize the library
     if (!glfwInit())
         return -1;
@@ -224,15 +226,15 @@ int main(void)
     gaze<<-camera;
     light<<-10,-10,-10;
     up_direction<<0,0,-1;
-	init_ground(light,objs,objs_color,objs_normals,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
+	init_ground(light,objs,objs_uv,objs_color,objs_normals,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
 	Vector3f pos = Vector3f::Zero();
 	srand(time(NULL));
-	for(int i=0;i<GRASS_NUM;i++){
+	for(int i=0;i<num;i++){
 		int random_var = rand();
 		pos << rand() % 10-5 + ((float)rand() / RAND_MAX),(float)(rand() % 10)-5 + ((float)rand() / RAND_MAX),0.0;
 		cout<<pos<<endl;
 		Grass grass(pos,i+1);
-		grass.draw(objs,objs_color,objs_normals,light,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
+		grass.draw(objs,objs_uv,objs_color,objs_normals,light,obj_size,translate_mat,to_center_mat,scale_mat,rotate_mat);
 		meadow.push_back(grass);
 	}
     // Vector3f pos = Vector3f::Zero();
@@ -249,7 +251,7 @@ int main(void)
             "#version 150 core\n"
                     "in vec3 position;"
                     "in vec3 normal;"
-					//"in vec2 uv;"
+					"in vec2 uv;"
                     "uniform vec3 light;"
                     "uniform mat4 view;"
                     "uniform mat4 transform;"
@@ -258,7 +260,7 @@ int main(void)
                     "uniform mat4 Perspective;"
                     "in vec3 color;"
                     "out vec3 f_color;"
-					//"out vec2 texcoord;"
+					"out vec2 texcoord;"
                     "void main()"
                     "{"
                     "    vec4 intermediate =  Perspective * Mcam * transform * vec4(position, 1.0);"
@@ -273,23 +275,23 @@ int main(void)
                     "    L = vec4(light,1.0);"
                     "    f_color = max(dot(normalize(L-transform*V),normalize(T*N)),0.0f)*color;"
                     //"   f_color=color;"
-					//"   texcoord = uv"
+					"    texcoord = uv;"
                     "}";
 
     const GLchar* fragment_shader =
             "#version 150 core\n"
                     "in vec3 f_color;"
-					//"in vec2 Texcoord;"
+					"in vec2 texcoord;"
                     "out vec4 outColor;"
-					//"uniform sampler2D tex;"
+					"uniform sampler2D tex;"
                     "uniform vec3 triangleColor;"
                     "void main()"
                     "{"
-					//"if(Texcoord[0]<0)"
-                    "    outColor = vec4(f_color, 1.0);"
-					//"else"
-					//"   outColor = texture(tex, Texcoord);"
-                    "}";
+					"    if(texcoord[0]<0)"
+                    "       outColor = vec4(f_color, 1.0);"
+					"    else"
+					"       outColor = texture(tex, texcoord);"
+					"}";
 
     // Compile the two shaders and upload the binary to the GPU
     // Note that we have to explicitly specify that the output "slot" called outColor
@@ -304,7 +306,7 @@ int main(void)
     glBindTexture(GL_TEXTURE_2D, tex);
 
     int width, height;
-    unsigned char* image = SOIL_load_image("soil.png", &width, &height, 0, SOIL_LOAD_RGB);
+    unsigned char* image = SOIL_load_image("dirt.png", &width, &height, 0, SOIL_LOAD_RGB);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
     SOIL_free_image_data(image);
 
@@ -341,13 +343,14 @@ int main(void)
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-		for(int i=0;i<GRASS_NUM;i++){
+		for(int i=0;i<num;i++){
 			meadow[i].update(objs,light,wind_x,wind_y);
 		}
         for(int i=0;i<objs.size();i++){
             program.bindVertexAttribArray("position",objs[i]);
             program.bindVertexAttribArray("color",objs_color[i]);
-            program.bindVertexAttribArray("normal",objs_normals[i]);
+			program.bindVertexAttribArray("normal",objs_normals[i]);
+            program.bindVertexAttribArray("uv",objs_uv[i]);
             // Bind your program
             program.bind();
 

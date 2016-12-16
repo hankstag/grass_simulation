@@ -26,6 +26,7 @@ public:
     void get_sample_pts(Vector3f& light,int num_pt, MatrixXf& sample_pts, MatrixXf& normal, MatrixXf& color);
     void draw(
         vector<VertexBufferObject>& objs,
+		vector<VertexBufferObject>& objs_uv,
         vector<VertexBufferObject>& objs_color,
         vector<VertexBufferObject>&,
         Eigen::Vector3f& light,

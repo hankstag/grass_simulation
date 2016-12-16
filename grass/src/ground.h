@@ -47,7 +47,8 @@ void calculate_norm(Vector3f& light, MatrixXf& V, MatrixXi& F, MatrixXf& barycen
 
 void init_ground(
     Vector3f& light,
-    vector<VertexBufferObject>& objs,
+	vector<VertexBufferObject>& objs,
+    vector<VertexBufferObject>& objs_uv,
     vector<VertexBufferObject>& objs_color,
     vector<VertexBufferObject>& objs_normals,
     vector<int>& obj_size,
@@ -58,6 +59,7 @@ void init_ground(
 ){
 
     Eigen::MatrixXf box;
+	Eigen::MatrixXf UV;
     Eigen::MatrixXi F;
     Eigen::MatrixXf C; // color for every vertex
     // Contains the vertex positions
@@ -92,6 +94,9 @@ void init_ground(
             //C(0,i)=0.6f;C(1,i)=0.4f;C(2,i)=0.2f;
         C(0,i)=0.6f;C(1,i)=0.4f;C(2,i)=0.2f;
     }
+	UV.resize(2,F.rows());
+	UV<<0.75,0.5 ,0.5,0.75,0.5,0.75,0.5 ,0.75,0.75,0.5, 0.75,0.5,0.5,0.75,0.5 ,0.75,0.75,0.50,0.50,0.75,0.50,0.75,0.75,0.50,0.75,0.75,1.0, 0.75 ,1.0 ,1.0,0.50,0.50,0.25,0.25,0.50,0.25,
+	0.25,0.25,0.5,0.25,0.5,0.5 ,0.75,0.75,0.5 ,0.75,0.5 ,0.5,1.0,1.0 ,0.75,1.0 ,0.75,0.75,0.25,0.25,0.0 ,0.25,0.0 ,0.0 ,0.25,0.50,0.25,0.50,0.50,0.25,0.25,0.0 ,0.0, 0.0 ,0.25,0.25;
     calculate_norm(light,box, F, barycenter,N_V);
     for(int i=0;i<3;i++){
         for(int j=0;j<box.rows();j++){
@@ -111,6 +116,7 @@ void init_ground(
     obj_size.push_back(F.rows());
 
     add_vbo(objs,V);
+	add_vbo(objs_uv,UV);
     add_vbo(objs_color,C);
     add_vbo(objs_normals,N_V);
 }
