@@ -11,7 +11,7 @@
 #include <unordered_map>
 // GLFW is necessary to handle the OpenGL context
 #include <GLFW/glfw3.h>
-#include <iostream> 
+#include <iostream>  
 #include "SOIL.h"
 
 // Linear Algebra Library
