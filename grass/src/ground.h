@@ -1,6 +1,6 @@
 #ifndef GROUND_H
 #define GROUND_H
-
+// this should be uppercase
 #include <Eigen/Core>
 #include "Helpers.h"
 #include <math.h>
