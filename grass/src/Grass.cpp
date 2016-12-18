@@ -55,7 +55,7 @@ void Grass::update(
         force(1,i)+=wind_y;
         acceleration.col(i)<<force.col(i)/mass(i);
     }
-	euler(ctrl_pts.block(0,2,3,3), 0.02, velocity, acceleration, vn, pn);
+	next_pos(ctrl_pts.block(0,2,3,3), 0.02, velocity, acceleration, vn, pn);
     velocity = vn;
     // how to make sure the length of each segments stays the same?
     Vector3f new_seg, pn_tmp;
@@ -119,7 +119,7 @@ void Grass::draw(
     vector<Matrix4f>& scale_mat,
     vector<Matrix4f>& rotate_mat
 ){
-    int num_pt = 100;
+    int num_pt = 200;
     Matrix4f scale(4,4);
     Eigen::MatrixXf color(3,num_pt*4);
     Eigen::MatrixXf sample_pts(3,num_pt*4);

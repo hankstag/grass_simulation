@@ -24,7 +24,7 @@ using namespace std;
 #define M44	 0.5
 
 float catmullRomSpline(float x, float v0,float v1,float v2,float v3);
-void euler(MatrixXf pos, float h, MatrixXf v, MatrixXf a, MatrixXf& vn, MatrixXf& pn);
+void next_pos(MatrixXf pos, float h, MatrixXf v, MatrixXf a, MatrixXf& vn, MatrixXf& pn);
 void hooke_law(MatrixXf dspmt, vector<double>& k, MatrixXf& force);
 
 #endif

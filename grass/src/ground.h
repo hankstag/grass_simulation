@@ -3,6 +3,7 @@
 
 #include <Eigen/Core>
 #include "Helpers.h"
+#include <math.h>
 #include "util.h"
 
 using namespace Eigen;
@@ -74,10 +75,6 @@ void init_ground(
     Matrix4f rotate(4,4);
     Matrix4f to_center(4,4);
     Vector4f center=Vector4f::Zero(4);
-    rotate<<0.9848f,0.1736f,0,0,
-    -0.1736f,0.9848f,0,0,
-    0,0,1,0,
-    0,0,0,1;
 
     box.resize(8,3);
     F.resize(36,1);
@@ -104,7 +101,10 @@ void init_ground(
         }
         center(i) = center(i)/box.rows();
     }
-    rotate<<1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
+    rotate<<0,-1,0,0,
+			1,0,0,0,
+			0,0,1,0,
+			0,0,0,1;
     to_center<<1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
     to_center(0,3)=-center(0);
     to_center(1,3)=-center(1);

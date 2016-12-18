@@ -93,10 +93,10 @@ void move_camera(Eigen::Vector3f& camera, int direction){
     u=up_direction.cross(w).normalized();
     v=w.cross(u);
     switch (direction) {
-        case 1:camera+=v;camera.normalize();camera=camera*2;break;
-        case 2:camera-=v;camera.normalize();camera=camera*2;break;
-        case 3:camera+=u;camera.normalize();camera=camera*2;break;
-        case 4:camera-=u;camera.normalize();camera=camera*2;break;
+        case 1:camera+=v/2.0;camera.normalize();camera=camera*2;break;
+        case 2:camera-=v/2.0;camera.normalize();camera=camera*2;break;
+        case 3:camera+=u/2.0;camera.normalize();camera=camera*2;break;
+        case 4:camera-=u/2.0;camera.normalize();camera=camera*2;break;
         default:break;
     }
 }
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Create a windowed mode window and its OpenGL context
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "Grass Simulator", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -387,7 +387,7 @@ int main(int argc, char *argv[])
             if(mode==ORTH)
                 Perspective<<1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
             else
-                Perspective<<n,0,0,0,
+				Perspective<<n,0,0,0,
                          0,n,0,0,
                          0,0,n+f,-f*n,
                          0,0,1,0;
