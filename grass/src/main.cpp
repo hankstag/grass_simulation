@@ -12,7 +12,7 @@
 // GLFW is necessary to handle the OpenGL context
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "SOIL.h"
+#include "SOIL.h" 
 
 // Linear Algebra Library
 #include <Eigen/Core>
