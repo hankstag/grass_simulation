@@ -3,7 +3,7 @@
 // OpenGL Helpers to reduce the clutter
 #include "Helpers.h"
 #include "Grass.h"
-#include "Ground.h"
+#include "ground.h"
 #include "util.h"
 #include <fstream>
 #include <string>
